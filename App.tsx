@@ -125,14 +125,12 @@ const App: React.FC = () => {
       const qty = parseInt(row[qtyKey] || "0") || 0;
       const skuName = row[skuNameKey] || "未命名商品";
 
-      // 视频视角
       if (!vMap[vid]) vMap[vid] = { id: vid, creator, orderIds: new Set(), totalQty: 0, skus: {} };
       vMap[vid].orderIds.add(orderId);
       vMap[vid].totalQty += qty;
       if (!vMap[vid].skus[sSku]) vMap[vid].skus[sSku] = { count: 0 };
       vMap[vid].skus[sSku].count += qty;
 
-      // 达人视角（增加内容和SKU透视）
       if (!cMap[creator]) cMap[creator] = { id: creator, orderIds: new Set(), totalQty: 0, videoIds: new Set(), skuStats: {}, videoStats: {} };
       cMap[creator].orderIds.add(orderId);
       cMap[creator].totalQty += qty;
@@ -142,7 +140,6 @@ const App: React.FC = () => {
       if (!cMap[creator].videoStats[vid]) cMap[creator].videoStats[vid] = 0;
       cMap[creator].videoStats[vid] += qty;
 
-      // 商品视角
       if (!sMap[skuName]) sMap[skuName] = { id: skuName, orderIds: new Set(), totalQty: 0, variants: {}, topVideos: {} };
       sMap[skuName].orderIds.add(orderId);
       sMap[skuName].totalQty += qty;
@@ -191,7 +188,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900">
+    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 font-sans">
       <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
@@ -200,24 +197,24 @@ const App: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 leading-none mb-1 italic uppercase tracking-tight">Attribution Dashboard</h1>
-              <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{filesCount} 报表就绪</p>
+              <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{filesCount} 报表已就绪</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <label className="cursor-pointer bg-slate-900 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl transition-all flex items-center gap-2 font-black text-sm shadow-xl">
-              <Upload size={18} /> 载入 CSV
+            <label className="cursor-pointer bg-slate-900 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl transition-all flex items-center gap-2 font-black text-sm shadow-xl group">
+              <Upload size={18} className="group-hover:bounce" /> 载入本地 CSV
               <input type="file" accept=".csv" multiple onChange={handleFileUpload} className="hidden" />
             </label>
             {allRows.length > 0 && (
-              <button onClick={() => { setAllRows([]); setFilesCount(0); setActiveSkuFilters(new Set()); }} className="p-3 text-slate-300 hover:text-rose-500 transition-colors">
+              <button onClick={() => { setAllRows([]); setFilesCount(0); setActiveSkuFilters(new Set()); }} className="p-3 text-slate-300 hover:text-rose-500 transition-colors" title="清除所有数据">
                 <X size={20} />
               </button>
             )}
           </div>
         </div>
         {allRows.length > 0 && (
-          <div className="bg-slate-900 text-white border-t border-white/5 py-4">
-            <div className="max-w-[1600px] mx-auto px-10 flex justify-around items-center divide-x divide-white/10">
+          <div className="bg-slate-900 text-white border-t border-white/5 py-4 overflow-x-auto">
+            <div className="max-w-[1600px] mx-auto px-10 flex justify-around items-center divide-x divide-white/10 min-w-[800px]">
               <GlobalMetricItem label="全盘订单量" value={globalMetrics.orders} icon={<BarChart3 size={18}/>} />
               <GlobalMetricItem label="累计销售件数" value={globalMetrics.qty} icon={<ShoppingBag size={18}/>} />
               <GlobalMetricItem label="覆盖视频 ID" value={globalMetrics.contents} icon={<Video size={18}/>} />
@@ -234,7 +231,7 @@ const App: React.FC = () => {
               <Layers size={80} className="text-indigo-600" />
             </div>
             <h2 className="text-5xl font-black text-slate-900 mb-4 italic uppercase tracking-tighter">Matrix Attribution</h2>
-            <p className="text-slate-400 font-bold max-w-md uppercase tracking-[0.2em] text-xs">载入成交报表以开启多级归因与内容链路追踪</p>
+            <p className="text-slate-400 font-bold max-w-md uppercase tracking-[0.2em] text-xs">本地处理，隐私安全。直接载入 TikTok 成交报表开启深度归因。</p>
           </div>
         ) : (
           <>
@@ -245,15 +242,15 @@ const App: React.FC = () => {
                   <span className="text-[11px] font-black uppercase tracking-widest">当前 SKU 筛选池 ({activeSkuFilters.size})</span>
                 </div>
                 {activeSkuFilters.size > 0 && (
-                  <button onClick={() => setActiveSkuFilters(new Set())} className="text-[10px] font-black text-rose-500 hover:underline uppercase">一键清除</button>
+                  <button onClick={() => setActiveSkuFilters(new Set())} className="text-[10px] font-black text-rose-500 hover:underline uppercase">清除过滤器</button>
                 )}
               </div>
               <div className="flex flex-wrap gap-2 min-h-[40px]">
                 {activeSkuFilters.size === 0 ? (
-                  <p className="text-slate-300 text-[11px] font-bold italic py-2">当前显示全部数据。点击下方任何 SKU 规格或商品名称可进行多项筛选。</p>
+                  <p className="text-slate-300 text-[11px] font-bold italic py-2">显示全盘数据。点击下方任何 SKU 或商品可激活联动筛选。</p>
                 ) : (
                   Array.from(activeSkuFilters as Set<string>).map(s => (
-                    <span key={s} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-lg shadow-indigo-100">
+                    <span key={s} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 shadow-lg shadow-indigo-100 animate-in fade-in zoom-in duration-200">
                       {s} <X size={14} className="cursor-pointer hover:text-white/70" onClick={() => toggleSku(s)} />
                     </span>
                   ))
@@ -273,7 +270,7 @@ const App: React.FC = () => {
                   type="text" 
                   value={searchTerm} 
                   onChange={(e) => setSearchTerm(e.target.value)} 
-                  placeholder="快速检索..." 
+                  placeholder="搜索 ID、达人或商品名称..." 
                   className="w-full pl-16 pr-8 py-5 rounded-[2.5rem] border border-slate-200 focus:outline-none focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 transition-all font-black text-slate-700 shadow-sm"
                 />
               </div>
@@ -306,8 +303,8 @@ const App: React.FC = () => {
                           )}
                           <div className="flex flex-col min-w-0">
                             {viewMode === 'video' ? (
-                              <a href={`https://www.tiktok.com/@/video/${item.id}`} target="_blank" rel="noopener noreferrer" className="text-lg font-black text-slate-900 leading-tight mb-2 truncate hover:text-indigo-600 transition-colors flex items-center gap-2">
-                                {item.id} <ExternalLink size={16} className="opacity-30"/>
+                              <a href={`https://www.tiktok.com/@/video/${item.id}`} target="_blank" rel="noopener noreferrer" className="text-sm font-black text-indigo-600 leading-tight mb-2 truncate hover:underline flex items-center gap-2 group/link">
+                                https://www.tiktok.com/@/video/{item.id} <ExternalLink size={14} className="opacity-0 group-hover/link:opacity-100 transition-opacity"/>
                               </a>
                             ) : (
                               <span className="text-lg font-black text-slate-900 leading-tight mb-2 truncate group-hover:text-indigo-600 transition-colors block">
@@ -333,7 +330,6 @@ const App: React.FC = () => {
                       <td className="px-10 py-10">
                         {viewMode === 'creator' ? (
                           <div className="grid grid-cols-2 gap-4">
-                            {/* 达人视角 - 带货 SKU 透视 */}
                             <div className="bg-indigo-600 rounded-[2rem] p-5 shadow-xl border border-white/10">
                               <div className="flex items-center gap-2 mb-4 text-indigo-100">
                                 <ShoppingBag size={14} strokeWidth={3} />
@@ -348,7 +344,6 @@ const App: React.FC = () => {
                                 ))}
                               </div>
                             </div>
-                            {/* 达人视角 - 爆款视频透视 */}
                             <div className="bg-slate-900 rounded-[2rem] p-5 shadow-xl border border-white/5">
                               <div className="flex items-center gap-2 mb-4 text-amber-400">
                                 <Trophy size={14} strokeWidth={3} />
@@ -358,7 +353,7 @@ const App: React.FC = () => {
                                 {item.rankedVideos.map((vid: any) => (
                                   <div key={vid.id} className="flex items-center justify-between bg-white/5 hover:bg-white/10 p-2.5 rounded-xl transition-colors group/vlink">
                                     <a href={`https://www.tiktok.com/@/video/${vid.id}`} target="_blank" className="text-[10px] font-black text-white hover:text-indigo-400 truncate flex items-center gap-2">
-                                      {vid.id} <ExternalLink size={10} className="opacity-0 group-hover/vlink:opacity-100" />
+                                      Video Link <ExternalLink size={10} />
                                     </a>
                                     <span className="text-emerald-400 text-[10px] font-black tabular-nums">{vid.qty} 件</span>
                                   </div>
@@ -380,13 +375,13 @@ const App: React.FC = () => {
                               <div className="bg-slate-900 rounded-[2rem] p-5 shadow-xl border border-white/5">
                                 <div className="flex items-center gap-2 mb-4 text-amber-400">
                                   <Sparkles size={16} strokeWidth={3} />
-                                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">主力贡献视频 ID</span>
+                                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">主力贡献视频透视</span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-2">
                                   {item.rankedVideos.map((vid: any) => (
                                     <div key={vid.id} className="flex items-center justify-between bg-white/5 hover:bg-white/10 p-3 rounded-xl transition-colors group/vlink">
-                                      <a href={`https://www.tiktok.com/@/video/${vid.id}`} target="_blank" className="text-[11px] font-black text-white hover:text-indigo-400 truncate flex items-center gap-2">
-                                        {vid.id} <ExternalLink size={12} className="opacity-0 group-hover/vlink:opacity-100" />
+                                      <a href={`https://www.tiktok.com/@/video/${vid.id}`} target="_blank" className="text-[11px] font-black text-white hover:text-indigo-400 truncate flex items-center gap-2 group/textlink">
+                                        https://www.tiktok.com/@/video/{vid.id} <ExternalLink size={12} className="opacity-0 group-hover/vlink:opacity-100" />
                                       </a>
                                       <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-lg">{vid.qty} 件</span>
                                     </div>
